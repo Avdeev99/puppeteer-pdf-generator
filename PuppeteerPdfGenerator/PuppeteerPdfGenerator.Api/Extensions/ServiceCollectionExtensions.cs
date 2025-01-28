@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection RegisterBrowser(this IServiceCollection services)
     {
-        PuppeteerSharp.Helpers.TaskHelper.DefaultTimeout = int.TryParse(Environment.GetEnvironmentVariable("EStatementProcessor__PdfSettings__PuppeteerDefaultTimeout"), out var defaultTimeout)
+        PuppeteerSharp.Helpers.TaskHelper.DefaultTimeout = int.TryParse(Environment.GetEnvironmentVariable("PuppeteerDefaultTimeout"), out var defaultTimeout)
         ? defaultTimeout
         : 30000;
 
@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
             "--disable-dev-shm-usage",
         };
 
-        _ = int.TryParse(Environment.GetEnvironmentVariable("EStatementProcessor__PdfSettings__PuppeteerProtocolTimeout"), out var protocolTimeout)
+        _ = int.TryParse(Environment.GetEnvironmentVariable("PuppeteerProtocolTimeout"), out var protocolTimeout)
             ? protocolTimeout
             : 30000;
 

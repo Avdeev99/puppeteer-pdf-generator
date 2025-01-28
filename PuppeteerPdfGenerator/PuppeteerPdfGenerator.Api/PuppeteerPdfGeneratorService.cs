@@ -67,11 +67,11 @@ public class PdfGeneratorService : IPdfGeneratorService
 
     private IAsyncPolicy<byte[]> BuildRetryPolicy()
     {
-        _ = int.TryParse(Environment.GetEnvironmentVariable("EStatementProcessor__PdfSettings__PuppeteerRetryCount"), out var retryCount)
+        _ = int.TryParse(Environment.GetEnvironmentVariable("PuppeteerRetryCount"), out var retryCount)
                 ? retryCount
                 : 3;
 
-        _ = int.TryParse(Environment.GetEnvironmentVariable("EStatementProcessor__PdfSettings__PuppeteerRetryInterval"), out var retryInterval)
+        _ = int.TryParse(Environment.GetEnvironmentVariable("PuppeteerRetryInterval"), out var retryInterval)
             ? retryInterval
             : 1000;
 
