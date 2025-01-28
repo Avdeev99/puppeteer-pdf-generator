@@ -11,9 +11,7 @@ FROM zenika/alpine-chrome AS final
 USER root
 RUN apk add --no-cache \
       tini aspnetcore8-runtime
-
 WORKDIR /app
 COPY --from=build /app/publish .
-
 USER chrome
 ENTRYPOINT ["tini", "--", "dotnet", "PuppeteerPdfGenerator.Api.dll"]
