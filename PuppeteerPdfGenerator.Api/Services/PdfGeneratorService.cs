@@ -8,7 +8,7 @@ namespace PuppeteerPdfGenerator.Api.Services;
 
 public class PdfGeneratorService : IPdfGeneratorService
 {
-    private static readonly int MaxConcurrentPages = int.TryParse(Environment.GetEnvironmentVariable("MaxConcurrentPages"), out var maxConcurrentPages)
+    private static readonly int MaxConcurrentPages = int.TryParse(Environment.GetEnvironmentVariable("MAX_CONCURRENCY"), out var maxConcurrentPages)
         ? maxConcurrentPages
         : 10;
 
