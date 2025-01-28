@@ -63,11 +63,5 @@ namespace PuppeteerPdfGenerator.Api.Controllers
                 });
             }
         }
-
-        [HttpGet("ping")]
-        public IActionResult Ping()
-        {
-            return Ok("pong");
-        }
     }
 }
