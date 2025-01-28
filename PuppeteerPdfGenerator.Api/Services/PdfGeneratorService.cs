@@ -45,7 +45,7 @@ public class PdfGeneratorService : IPdfGeneratorService
 
                 var puppeteerPdfOptions = new PuppeteerSharp.PdfOptions
                 {
-                    Format = (PaperFormat)Enum.Parse(typeof(PaperFormat), options.PdfOptions.Format, true),
+                    Format = GetPaperFormat(options.PdfOptions.Format),
                     PrintBackground = options.PdfOptions.PrintBackground,
                     DisplayHeaderFooter = options.PdfOptions.DisplayHeaderFooter,
                     MarginOptions = new PuppeteerSharp.Media.MarginOptions
@@ -102,6 +102,25 @@ public class PdfGeneratorService : IPdfGeneratorService
 
 
         return Policy.WrapAsync(retryPolicy, fallbackPolicy);
+    }
+
+    private PaperFormat GetPaperFormat(string format)
+    {
+        return format?.ToLower() switch
+        {
+            "letter" => PaperFormat.Letter,
+            "legal" => PaperFormat.Legal,
+            "tabloid" => PaperFormat.Tabloid,
+            "ledger" => PaperFormat.Ledger,
+            "a0" => PaperFormat.A0,
+            "a1" => PaperFormat.A1,
+            "a2" => PaperFormat.A2,
+            "a3" => PaperFormat.A3,
+            "a4" => PaperFormat.A4,
+            "a5" => PaperFormat.A5,
+            "a6" => PaperFormat.A6,
+            _ => PaperFormat.A4 // default to A4 if format is not recognized
+        };
     }
 }
 
