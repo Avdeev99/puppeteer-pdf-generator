@@ -1,5 +1,5 @@
 ﻿using PuppeteerSharp;
-
+using PuppeteerPdfGenerator.Api.Services;
 namespace PuppeteerPdfGenerator.Api.Extensions;
 
 public static class ServiceCollectionExtensions
