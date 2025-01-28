@@ -1,12 +1,79 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PuppeteerPdfGenerator.Api.Models;
+using PuppeteerPdfGenerator.Api.Services;
 
 namespace PuppeteerPdfGenerator.Api.Controllers
 {
-    public class PdfGeneratorController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PdfGeneratorController : ControllerBase
     {
-        public IActionResult Index()
+        private readonly IPdfGeneratorService _pdfGeneratorService;
+        private readonly ILogger<PdfGeneratorController> _logger;
+
+        public PdfGeneratorController(
+            IPdfGeneratorService pdfGeneratorService,
+            ILogger<PdfGeneratorController> logger)
         {
-            return View();
+            _pdfGeneratorService = pdfGeneratorService;
+            _logger = logger;
+        }
+
+        [HttpPost("rpc")]
+        public async Task<IActionResult> HandleRpcRequest([FromBody] JsonRpcRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (request.Method != "generatePdf")
+                {
+                    return Ok(new JsonRpcErrorResponse
+                    {
+                        Error = new JsonRpcError
+                        {
+                            Code = -32601,
+                            Message = $"Method {request.Method} not found"
+                        },
+                        Id = request.Id
+                    });
+                }
+
+                _logger.LogInformation("Generating PDF");
+
+                var options = new GeneratePdfOptions
+                {
+                    ContentHtml = request.Params.Url,
+                    PdfOptions = request.Params.PdfOptions
+                };
+
+                var pdfBytes = await _pdfGeneratorService.GeneratePdfAsync(options, cancellationToken);
+                var base64Pdf = Convert.ToBase64String(pdfBytes);
+
+                return Ok(new JsonRpcSuccessResponse
+                {
+                    Result = base64Pdf,
+                    Id = request.Id
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating PDF");
+                
+                return Ok(new JsonRpcErrorResponse
+                {
+                    Error = new JsonRpcError
+                    {
+                        Code = -32603,
+                        Message = ex.Message
+                    },
+                    Id = request.Id
+                });
+            }
+        }
+
+        [HttpGet("ping")]
+        public IActionResult Ping()
+        {
+            return Ok("pong");
         }
     }
 }

@@ -1,4 +1,3 @@
-using PuppeteerPdfGenerator.Api;
 using PuppeteerPdfGenerator.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);

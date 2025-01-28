@@ -3,7 +3,7 @@ using Polly;
 using PuppeteerPdfGenerator.Api.Models;
 using PuppeteerSharp;
 
-namespace PuppeteerPdfGenerator.Api;
+namespace PuppeteerPdfGenerator.Api.Services;
 
 public class PdfGeneratorService : IPdfGeneratorService
 {
