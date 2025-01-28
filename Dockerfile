@@ -9,7 +9,7 @@ RUN dotnet publish "./PuppeteerPdfGenerator.Api.csproj" -c Release -o /app/publi
 
 FROM zenika/alpine-chrome AS final
 USER root
-RUN apk add --no-cache \
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
       tini aspnetcore8-runtime
 WORKDIR /app
 COPY --from=build /app/publish .
