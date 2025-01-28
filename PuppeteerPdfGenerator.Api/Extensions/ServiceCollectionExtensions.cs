@@ -34,7 +34,7 @@ public static class ServiceCollectionExtensions
         var options = new LaunchOptions
         {
             Headless = true,
-            ExecutablePath = Environment.GetEnvironmentVariable("CHROME_EXECUTABLE_PATH"),
+            ExecutablePath = Environment.GetEnvironmentVariable("CHROME_EXECUTABLE_PATH") ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
             Args = launchArgs,
             ProtocolTimeout = protocolTimeout,
         };

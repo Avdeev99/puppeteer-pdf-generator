@@ -5,7 +5,7 @@ using PuppeteerPdfGenerator.Api.Services;
 namespace PuppeteerPdfGenerator.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api")]
     public class PdfGeneratorController : ControllerBase
     {
         private readonly IPdfGeneratorService _pdfGeneratorService;

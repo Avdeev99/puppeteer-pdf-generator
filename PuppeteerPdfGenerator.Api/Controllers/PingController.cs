@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace PuppeteerPdfGenerator.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api")]
     public class PingController : ControllerBase
     {
-        [HttpGet]
+        [HttpGet("ping")]
         public IActionResult Ping()
         {
             return Ok("pong");
