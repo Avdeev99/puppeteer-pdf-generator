@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using PuppeteerSharp;
 
 namespace PuppeteerPdfGenerator.Api.Models
 {
@@ -25,5 +24,35 @@ namespace PuppeteerPdfGenerator.Api.Models
 
         [JsonPropertyName("pdfOptions")]
         public PdfOptions PdfOptions { get; set; }
+    }
+
+    public class PdfOptions
+    {
+        [JsonPropertyName("format")]
+        public string Format { get; set; }
+
+        [JsonPropertyName("printBackground")]
+        public bool PrintBackground { get; set; }
+
+        [JsonPropertyName("displayHeaderFooter")]
+        public bool DisplayHeaderFooter { get; set; }
+
+        [JsonPropertyName("margin")]
+        public PdfMargin Margin { get; set; }
+
+        [JsonPropertyName("headerTemplate")]
+        public string HeaderTemplate { get; set; }
+
+        [JsonPropertyName("footerTemplate")]
+        public string FooterTemplate { get; set; }
+    }
+
+    public class PdfMargin
+    {
+        [JsonPropertyName("top")]
+        public string Top { get; set; }
+
+        [JsonPropertyName("bottom")]
+        public string Bottom { get; set; }
     }
 }

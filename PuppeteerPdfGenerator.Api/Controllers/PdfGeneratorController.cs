@@ -39,13 +39,7 @@ namespace PuppeteerPdfGenerator.Api.Controllers
 
                 _logger.LogInformation("Generating PDF");
 
-                var options = new GeneratePdfOptions
-                {
-                    ContentHtml = request.Params.Url,
-                    PdfOptions = request.Params.PdfOptions
-                };
-
-                var pdfBytes = await _pdfGeneratorService.GeneratePdfAsync(options, cancellationToken);
+                var pdfBytes = await _pdfGeneratorService.GeneratePdfAsync(request.Params, cancellationToken);
                 var base64Pdf = Convert.ToBase64String(pdfBytes);
 
                 return Ok(new JsonRpcSuccessResponse

@@ -2,6 +2,7 @@
 using Polly;
 using PuppeteerPdfGenerator.Api.Models;
 using PuppeteerSharp;
+using PuppeteerSharp.Media;
 
 namespace PuppeteerPdfGenerator.Api.Services;
 
@@ -25,7 +26,7 @@ public class PdfGeneratorService : IPdfGeneratorService
         _retryPolicy = BuildRetryPolicy();
     }
 
-    public async Task<byte[]> GeneratePdfAsync(GeneratePdfOptions options, CancellationToken cancellationToken)
+    public async Task<byte[]> GeneratePdfAsync(GeneratePdfParams options, CancellationToken cancellationToken)
     {
         var watcher = new Stopwatch();
 
@@ -36,20 +37,27 @@ public class PdfGeneratorService : IPdfGeneratorService
 
             try
             {
-                await Semaphore.WaitAsync();
+                // Navigate to URL if provided
+                if (!string.IsNullOrEmpty(options.Url))
+                {
+                    await page.GoToAsync(options.Url);
+                }
 
-                await page.SetContentAsync(
-                    options.ContentHtml,
-                    new NavigationOptions
+                var puppeteerPdfOptions = new PuppeteerSharp.PdfOptions
+                {
+                    Format = (PaperFormat)Enum.Parse(typeof(PaperFormat), options.PdfOptions.Format, true),
+                    PrintBackground = options.PdfOptions.PrintBackground,
+                    DisplayHeaderFooter = options.PdfOptions.DisplayHeaderFooter,
+                    MarginOptions = new PuppeteerSharp.Media.MarginOptions
                     {
-                        WaitUntil = new[] { WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Load, WaitUntilNavigation.DOMContentLoaded },
-                    });
+                        Top = options.PdfOptions.Margin.Top,
+                        Bottom = options.PdfOptions.Margin.Bottom
+                    },
+                    HeaderTemplate = options.PdfOptions.HeaderTemplate,
+                    FooterTemplate = options.PdfOptions.FooterTemplate
+                };
 
-                var pdfBytes = await page.PdfDataAsync(options.PdfOptions);
-
-                watcher.Reset();
-
-                return await page.PdfDataAsync();
+                return await page.PdfDataAsync(puppeteerPdfOptions);
             }
             finally
             {
