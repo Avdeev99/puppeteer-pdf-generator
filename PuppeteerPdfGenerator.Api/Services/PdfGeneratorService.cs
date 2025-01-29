@@ -8,39 +8,37 @@ namespace PuppeteerPdfGenerator.Api.Services;
 
 public class PdfGeneratorService : IPdfGeneratorService
 {
-    private static readonly int MaxConcurrentPages = int.TryParse(Environment.GetEnvironmentVariable("MAX_CONCURRENCY"), out var maxConcurrentPages)
-        ? maxConcurrentPages
-        : 10;
-
-    private static readonly SemaphoreSlim Semaphore = new(MaxConcurrentPages, MaxConcurrentPages);
-
-    private readonly IBrowser _browser;
     private readonly ILogger<PdfGeneratorService> _logger;
-
+    private readonly IPagePoolService _pagePoolService;
     private readonly IAsyncPolicy<byte[]> _retryPolicy;
 
-    public PdfGeneratorService(IBrowser browser, ILogger<PdfGeneratorService> logger)
+    public PdfGeneratorService(ILogger<PdfGeneratorService> logger, IPagePoolService pagePoolService)
     {
-        _browser = browser;
         _logger = logger;
+        _pagePoolService = pagePoolService;
         _retryPolicy = BuildRetryPolicy();
     }
 
     public async Task<byte[]> GeneratePdfAsync(GeneratePdfParams options, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Puppeteer PDF generation started.");
+
         var watcher = new Stopwatch();
 
         var result = await _retryPolicy.ExecuteAsync(async () =>
         {
-            await Semaphore.WaitAsync(cancellationToken);
-            await using var page = await _browser.NewPageAsync();
+            await using var page = await _pagePoolService.GetPageAsync(cancellationToken);
 
             try
             {
-                // Navigate to URL if provided
-                if (!string.IsNullOrEmpty(options.Url))
+                if (!string.IsNullOrEmpty(options.ContentHtml))
                 {
-                    await page.GoToAsync(options.Url);
+                    await page.SetContentAsync(
+                        options.ContentHtml,
+                        new NavigationOptions
+                        {
+                            WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Load, WaitUntilNavigation.DOMContentLoaded]
+                        });
                 }
 
                 var puppeteerPdfOptions = new PuppeteerSharp.PdfOptions
@@ -48,7 +46,7 @@ public class PdfGeneratorService : IPdfGeneratorService
                     Format = GetPaperFormat(options.PdfOptions.Format),
                     PrintBackground = options.PdfOptions.PrintBackground,
                     DisplayHeaderFooter = options.PdfOptions.DisplayHeaderFooter,
-                    MarginOptions = new PuppeteerSharp.Media.MarginOptions
+                    MarginOptions = new MarginOptions
                     {
                         Top = options.PdfOptions.Margin.Top,
                         Bottom = options.PdfOptions.Margin.Bottom
@@ -57,7 +55,11 @@ public class PdfGeneratorService : IPdfGeneratorService
                     FooterTemplate = options.PdfOptions.FooterTemplate
                 };
 
-                return await page.PdfDataAsync(puppeteerPdfOptions);
+                var result = await page.PdfDataAsync(puppeteerPdfOptions);
+
+                _logger.LogInformation("Puppeteer PDF generation completed in {Elapsed}ms.", watcher.ElapsedMilliseconds);
+
+                return result;
             }
             finally
             {
@@ -66,7 +68,7 @@ public class PdfGeneratorService : IPdfGeneratorService
                     await page.CloseAsync();
                 }
 
-                Semaphore.Release();
+                await _pagePoolService.ReturnPageAsync(page);
             }
         });
 
@@ -75,11 +77,11 @@ public class PdfGeneratorService : IPdfGeneratorService
 
     private IAsyncPolicy<byte[]> BuildRetryPolicy()
     {
-        _ = int.TryParse(Environment.GetEnvironmentVariable("PuppeteerRetryCount"), out var retryCount)
+        _ = int.TryParse(Environment.GetEnvironmentVariable("PUPPETEER_RETRY_COUNT"), out var retryCount)
                 ? retryCount
                 : 3;
 
-        _ = int.TryParse(Environment.GetEnvironmentVariable("PuppeteerRetryInterval"), out var retryInterval)
+        _ = int.TryParse(Environment.GetEnvironmentVariable("PUPPETEER_RETRY_INTERVAL"), out var retryInterval)
             ? retryInterval
             : 1000;
 

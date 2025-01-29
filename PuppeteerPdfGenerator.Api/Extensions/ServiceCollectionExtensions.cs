@@ -6,6 +6,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterServices(this IServiceCollection services)
     {
+        services.AddSingleton<IPagePoolService, PagePoolService>();
         services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
         services.RegisterBrowser();
 
@@ -14,9 +15,9 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection RegisterBrowser(this IServiceCollection services)
     {
-        PuppeteerSharp.Helpers.TaskHelper.DefaultTimeout = int.TryParse(Environment.GetEnvironmentVariable("PuppeteerDefaultTimeout"), out var defaultTimeout)
-        ? defaultTimeout
-        : 30000;
+        PuppeteerSharp.Helpers.TaskHelper.DefaultTimeout = int.TryParse(Environment.GetEnvironmentVariable("PUPPETEER_DEFAULT_TIMEOUT"), out var defaultTimeout)
+            ? defaultTimeout
+            : 30000;
 
         var launchArgs = new[]
         {
@@ -27,14 +28,14 @@ public static class ServiceCollectionExtensions
             "--disable-dev-shm-usage",
         };
 
-        _ = int.TryParse(Environment.GetEnvironmentVariable("PuppeteerProtocolTimeout"), out var protocolTimeout)
+        _ = int.TryParse(Environment.GetEnvironmentVariable("PUPPETEER_PROTOCOL_TIMEOUT"), out var protocolTimeout)
             ? protocolTimeout
             : 30000;
 
         var options = new LaunchOptions
         {
             Headless = true,
-            ExecutablePath = Environment.GetEnvironmentVariable("CHROMIUM_PATH") ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            ExecutablePath = Environment.GetEnvironmentVariable("CHROMIUM_PATH"),
             Args = launchArgs,
             ProtocolTimeout = protocolTimeout,
         };

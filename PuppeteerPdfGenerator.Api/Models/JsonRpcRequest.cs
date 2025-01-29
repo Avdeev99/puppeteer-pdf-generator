@@ -19,8 +19,8 @@ namespace PuppeteerPdfGenerator.Api.Models
 
     public class GeneratePdfParams
     {
-        [JsonPropertyName("url")]
-        public string Url { get; set; }
+        [JsonPropertyName("contentHtml")]
+        public string ContentHtml { get; set; }
 
         [JsonPropertyName("pdfOptions")]
         public PdfOptions PdfOptions { get; set; }

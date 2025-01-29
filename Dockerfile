@@ -9,6 +9,9 @@ RUN dotnet publish "./PuppeteerPdfGenerator.Api.csproj" -c Release -o /app/publi
 
 FROM zenika/alpine-chrome AS final
 USER root
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_CHROMIUM_PATH=/usr/bin/chromium
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
       tini aspnetcore8-runtime
 WORKDIR /app
