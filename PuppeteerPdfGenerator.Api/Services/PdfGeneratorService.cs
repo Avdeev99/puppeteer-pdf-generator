@@ -63,11 +63,6 @@ public class PdfGeneratorService : IPdfGeneratorService
             }
             finally
             {
-                if (page is { IsClosed: false })
-                {
-                    await page.CloseAsync();
-                }
-
                 await _pagePoolService.ReturnPageAsync(page);
             }
         });

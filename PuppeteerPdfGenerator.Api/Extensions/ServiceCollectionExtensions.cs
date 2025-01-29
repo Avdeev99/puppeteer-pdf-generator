@@ -32,10 +32,12 @@ public static class ServiceCollectionExtensions
             ? protocolTimeout
             : 30000;
 
+        var chromiumPath = Environment.GetEnvironmentVariable("CHROMIUM_PATH") ?? "/usr/bin/chromium";
+
         var options = new LaunchOptions
         {
             Headless = true,
-            ExecutablePath = Environment.GetEnvironmentVariable("CHROMIUM_PATH"),
+            ExecutablePath = chromiumPath,
             Args = launchArgs,
             ProtocolTimeout = protocolTimeout,
         };
