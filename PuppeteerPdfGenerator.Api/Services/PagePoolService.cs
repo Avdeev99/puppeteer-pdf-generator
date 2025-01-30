@@ -39,6 +39,7 @@ public class PagePoolService : IPagePoolService
 
     public async Task<IPage> GetPageAsync(CancellationToken cancellationToken = default)
     {
+        await _pagePool.Reader.WaitToReadAsync();
         var page = await _pagePool.Reader.ReadAsync(cancellationToken);
 
         _logger.LogInformation("Got page from pool.");
@@ -48,15 +49,25 @@ public class PagePoolService : IPagePoolService
 
     public async Task ReturnPageAsync(IPage page, CancellationToken cancellationToken = default)
     {
-        await ClearPageContentAsync(page);
+        page = await RepairPageAsync(page);
         await _pagePool.Writer.WriteAsync(page, cancellationToken);
 
         _logger.LogInformation("Returned page to pool.");
     }
 
-    private async Task ClearPageContentAsync(IPage page)
+    private async Task<IPage> RepairPageAsync(IPage page)
     {
-        await page.SetContentAsync("<html><body></body></html>");
+        if (page.IsClosed || page.Client == null || page.Client.CloseReason != null)
+        {
+            _logger.LogWarning("Recreating page during return to pool.");
+            page = await _browser.NewPageAsync();
+        }
+        else
+        {
+            await page.SetContentAsync("<html><body></body></html>");
+        }
+
+        return page;
     }
 
     public async ValueTask DisposeAsync()
@@ -68,5 +79,7 @@ public class PagePoolService : IPagePoolService
                 await page.CloseAsync();
             }
         }
+
+        _logger.LogInformation("All pages from pool disposed.");
     }
 }

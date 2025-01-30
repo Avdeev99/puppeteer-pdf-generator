@@ -27,7 +27,7 @@ public class PdfGeneratorService : IPdfGeneratorService
 
         var result = await _retryPolicy.ExecuteAsync(async () =>
         {
-            await using var page = await _pagePoolService.GetPageAsync(cancellationToken);
+            var page = await _pagePoolService.GetPageAsync(cancellationToken);
 
             try
             {
@@ -37,7 +37,8 @@ public class PdfGeneratorService : IPdfGeneratorService
                         options.ContentHtml,
                         new NavigationOptions
                         {
-                            WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Load, WaitUntilNavigation.DOMContentLoaded]
+                            WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Load, WaitUntilNavigation.DOMContentLoaded],
+                            Timeout = 60000,
                         });
                 }
 
@@ -57,7 +58,8 @@ public class PdfGeneratorService : IPdfGeneratorService
 
                 var result = await page.PdfDataAsync(puppeteerPdfOptions);
 
-                _logger.LogInformation("Puppeteer PDF generation completed in {Elapsed}ms.", watcher.ElapsedMilliseconds);
+                _logger.LogInformation("Puppeteer PDF generation completed in {Elapsed}ms.", watcher.Elapsed.TotalMilliseconds);
+                watcher.Reset();
 
                 return result;
             }

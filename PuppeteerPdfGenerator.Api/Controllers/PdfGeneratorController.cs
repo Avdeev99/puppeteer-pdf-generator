@@ -52,7 +52,7 @@ namespace PuppeteerPdfGenerator.Api.Controllers
             {
                 _logger.LogError(ex, "Error generating PDF");
                 
-                return Ok(new JsonRpcErrorResponse
+                return StatusCode(500, new JsonRpcErrorResponse
                 {
                     Error = new JsonRpcError
                     {
